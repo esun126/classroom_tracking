@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生课堂行为统计系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #1e88e5;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .nav-link {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: #1e88e5;
+            color: white;
+        }
+        
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .options {
+            margin-top: 10px;
+        }
+        
+        .option {
+            margin-bottom: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .radio-option input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        button {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #1565c0;
+        }
+        
+        .success-message {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .box {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .subject-selector {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .subject-btn {
+            padding: 10px 15px;
+            margin-right: 10px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .subject-btn.active {
+            background-color: #1e88e5;
+            color: white;
+        }
+        
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-section select, .filter-section input {
+            width: auto;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>学生课堂行为统计系统</h1>
+        </header>
+        
+        <nav>
+            <a class="nav-link active" onclick="showSection('login-section')">登录</a>
+            <a class="nav-link" onclick="showSection('teacher-section')">教师记录</a>
+            <a class="nav-link" onclick="showSection('admin-section')">管理员统计</a>
+        </nav>
+        
+        <!-- 登录部分 -->
+        <div id="login-section" class="section active">
+            <div class="card">
+                <h2>系统登录</h2>
+                <form id="login-form">
+                    <label for="username">用户名:</label>
+                    <input type="text" id="username" required placeholder="请输入用户名">
+                    
+                    <label for="password">密码:</label>
+                    <input type="password" id="password" required placeholder="请输入密码">
+                    
+                    <label for="role">角色:</label>
+                    <select id="role" required>
+                        <option value="">-- 请选择角色 --</option>
+                        <option value="teacher">教师</option>
+                        <option value="admin">管理员</option>
+                    </select>
+                    
+                    <button type="submit">登录</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 教师记录部分 -->
+        <div id="teacher-section" class="section">
+            <div class="card">
+                <h2>学生课堂表现记录</h2>
+                <div class="success-message" id="teacher-success">记录提交成功！</div>
+                
+                <form id="teacher-form">
+                    <label for="student-name">学生姓名:</label>
+                    <select id="student-name" required>
+                        <option value="">-- 请选择学生 --</option>
+                        <option value="张三">张三</option>
+                        <option value="李四">李四</option>
+                        <option value="王五">王五</option>
+                        <option value="赵六">赵六</option>
+                    </select>
+                    
+                    <label for="record-date">记录日期:</label>
+                    <input type="date" id="record-date" required>
+                    
+                    <div class="subject-selector">
+                        <button type="button" class="subject-btn active" data-subject="chinese">语文</button>
+                        <button type="button" class="subject-btn" data-subject="math">数学</button>
+                        <button type="button" class="subject-btn" data-subject="english">英语</button>
+                    </div>
+                    
+                    <div id="chinese-questions" class="subject-questions">
+                        <div class="question">
+                            <p>1. 学生在语文课堂上的专注度如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-focus" id="chinese-focus-1" value="非常专注" required>
+                                    <label for="chinese-focus-1">非常专注</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-focus" id="chinese-focus-2" value="比较专注">
+                                    <label for="chinese-focus-2">比较专注</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-focus" id="chinese-focus-3" value="一般">
+                                    <label for="chinese-focus-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-focus" id="chinese-focus-4" value="不够专注">
+                                    <label for="chinese-focus-4">不够专注</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-focus" id="chinese-focus-5" value="完全不专注">
+                                    <label for="chinese-focus-5">完全不专注</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question">
+                            <p>2. 学生的课堂参与度如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-participation" id="chinese-participation-1" value="积极主动" required>
+                                    <label for="chinese-participation-1">积极主动</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-participation" id="chinese-participation-2" value="较为积极">
+                                    <label for="chinese-participation-2">较为积极</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-participation" id="chinese-participation-3" value="一般">
+                                    <label for="chinese-participation-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-participation" id="chinese-participation-4" value="较少参与">
+                                    <label for="chinese-participation-4">较少参与</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-participation" id="chinese-participation-5" value="不参与">
+                                    <label for="chinese-participation-5">不参与</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question">
+                            <p>3. 学生的作业完成情况如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-homework" id="chinese-homework-1" value="全部完成且质量高" required>
+                                    <label for="chinese-homework-1">全部完成且质量高</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-homework" id="chinese-homework-2" value="全部完成">
+                                    <label for="chinese-homework-2">全部完成</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-homework" id="chinese-homework-3" value="部分完成">
+                                    <label for="chinese-homework-3">部分完成</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-homework" id="chinese-homework-4" value="完成较少">
+                                    <label for="chinese-homework-4">完成较少</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="chinese-homework" id="chinese-homework-5" value="未完成">
+                                    <label for="chinese-homework-5">未完成</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="math-questions" class="subject-questions" style="display: none;">
+                        <div class="question">
+                            <p>1. 学生在数学课堂上的理解能力如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="math-understanding" id="math-understanding-1" value="理解迅速" required>
+                                    <label for="math-understanding-1">理解迅速</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-understanding" id="math-understanding-2" value="理解较好">
+                                    <label for="math-understanding-2">理解较好</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-understanding" id="math-understanding-3" value="一般">
+                                    <label for="math-understanding-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-understanding" id="math-understanding-4" value="理解慢">
+                                    <label for="math-understanding-4">理解慢</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-understanding" id="math-understanding-5" value="难以理解">
+                                    <label for="math-understanding-5">难以理解</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question">
+                            <p>2. 学生解决问题的能力如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="math-problem-solving" id="math-problem-solving-1" value="非常出色" required>
+                                    <label for="math-problem-solving-1">非常出色</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-problem-solving" id="math-problem-solving-2" value="较好">
+                                    <label for="math-problem-solving-2">较好</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-problem-solving" id="math-problem-solving-3" value="一般">
+                                    <label for="math-problem-solving-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-problem-solving" id="math-problem-solving-4" value="较差">
+                                    <label for="math-problem-solving-4">较差</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-problem-solving" id="math-problem-solving-5" value="很差">
+                                    <label for="math-problem-solving-5">很差</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question">
+                            <p>3. 学生的数学思维能力如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="math-thinking" id="math-thinking-1" value="逻辑性强" required>
+                                    <label for="math-thinking-1">逻辑性强</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-thinking" id="math-thinking-2" value="逻辑性较好">
+                                    <label for="math-thinking-2">逻辑性较好</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-thinking" id="math-thinking-3" value="一般">
+                                    <label for="math-thinking-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-thinking" id="math-thinking-4" value="逻辑性较弱">
+                                    <label for="math-thinking-4">逻辑性较弱</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="math-thinking" id="math-thinking-5" value="逻辑性很弱">
+                                    <label for="math-thinking-5">逻辑性很弱</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="english-questions" class="subject-questions" style="display: none;">
+                        <div class="question">
+                            <p>1. 学生的英语听力能力如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="english-listening" id="english-listening-1" value="优秀" required>
+                                    <label for="english-listening-1">优秀</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-listening" id="english-listening-2" value="良好">
+                                    <label for="english-listening-2">良好</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-listening" id="english-listening-3" value="一般">
+                                    <label for="english-listening-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-listening" id="english-listening-4" value="较差">
+                                    <label for="english-listening-4">较差</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-listening" id="english-listening-5" value="很差">
+                                    <label for="english-listening-5">很差</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question">
+                            <p>2. 学生的英语口语表达如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="english-speaking" id="english-speaking-1" value="流利自信" required>
+                                    <label for="english-speaking-1">流利自信</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-speaking" id="english-speaking-2" value="较为流利">
+                                    <label for="english-speaking-2">较为流利</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-speaking" id="english-speaking-3" value="一般">
+                                    <label for="english-speaking-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-speaking" id="english-speaking-4" value="不太流利">
+                                    <label for="english-speaking-4">不太流利</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-speaking" id="english-speaking-5" value="不愿开口">
+                                    <label for="english-speaking-5">不愿开口</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="question">
+                            <p>3. 学生的词汇掌握情况如何？</p>
+                            <div class="options">
+                                <div class="radio-option">
+                                    <input type="radio" name="english-vocabulary" id="english-vocabulary-1" value="掌握广泛" required>
+                                    <label for="english-vocabulary-1">掌握广泛</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-vocabulary" id="english-vocabulary-2" value="掌握较好">
+                                    <label for="english-vocabulary-2">掌握较好</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-vocabulary" id="english-vocabulary-3" value="一般">
+                                    <label for="english-vocabulary-3">一般</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-vocabulary" id="english-vocabulary-4" value="掌握较少">
+                                    <label for="english-vocabulary-4">掌握较少</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="english-vocabulary" id="english-vocabulary-5" value="掌握很少">
+                                    <label for="english-vocabulary-5">掌握很少</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <label for="teacher-comments">补充说明:</label>
+                    <textarea id="teacher-comments" rows="4" placeholder="请输入您对该学生的其他观察或建议..."></textarea>
+                    
+                    <button type="submit">提交记录</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 管理员统计部分 -->
+        <div id="admin-section" class="section">
+            <div class="card">
+                <h2>学生表现统计分析</h2>
+                
+                <div class="filter-section">
+                    <select id="student-filter">
+                        <option value="">所有学生</option>
+                        <option value="张三">张三</option>
+                        <option value="李四">李四</option>
+                        <option value="王五">王五</option>
+                        <option value="赵六">赵六</option>
+                    </select>
+                    
+                    <select id="subject-filter">
+                        <option value="">所有科目</option>
+                        <option value="chinese">语文</option>
+                        <option value="math">数学</option>
+                        <option value="english">英语</option>
+                    </select>
+                    
+                    <input type="date" id="date-from" placeholder="开始日期">
+                    <input type="date" id="date-to" placeholder="结束日期">
+                    
+                    <button id="filter-button">筛选</button>
+                </div>
+                
+                <div class="box">
+                    <h3>总体统计</h3>
+                    <div class="chart-container">
+                        <div id="summary-chart" style="width: 100%; height: 300px; background-color: #f9f9f9; display: flex; justify-content: center; align-items: center;">
+                            <p>选择筛选条件查看统计图表</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box">
+                    <h3>详细记录</h3>
+                    <table id="records-table">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>学生</th>
+                                <th>科目</th>
+                                <th>问题1</th>
+                                <th>问题2</th>
+                                <th>问题3</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 数据将在JavaScript中动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据库
+        let userData = {
+            teachers: [
+                { username: 'chinese_teacher', password: '123456', subject: 'chinese', name: '王老师' },
+                { username: 'math_teacher', password: '123456', subject: 'math', name: '李老师' },
+                { username: 'english_teacher', password: '123456', subject: 'english', name: '张老师' }
+            ],
+            admins: [
+                { username: 'admin', password: 'admin123', name: '管理员' }
+            ]
+        };
+        
+        // 学生表现记录数据库
+        let studentRecords = [];
+        
+        // 预填充一些示例数据
+        function generateSampleData() {
+            const students = ['张三', '李四', '王五', '赵六'];
+            const subjects = ['chinese', 'math', 'english'];
+            const chineseAnswers = [
+                ['非常专注', '比较专注', '一般', '不够专注', '完全不专注'],
+                ['积极主动', '较为积极', '一般', '较少参与', '不参与'],
+                ['全部完成且质量高', '全部完成', '部分完成', '完成较少', '未完成']
+            ];
+            const mathAnswers = [
+                ['理解迅速', '理解较好', '一般', '理解慢', '难以理解'],
+                ['非常出色', '较好', '一般', '较差', '很差'],
+                ['逻辑性强', '逻辑性较好', '一般', '逻辑性较弱', '逻辑性很弱']
+            ];
+            const englishAnswers = [
+                ['优秀', '良好', '一般', '较差', '很差'],
+                ['流利自信', '较为流利', '一般', '不太流利', '不愿开口'],
+                ['掌握广泛', '掌握较好', '一般', '掌握较少', '掌握很少']
+            ];
+            
+            // 生成过去30天的记录
+            const today = new Date();
+            
+            for (let i = 0; i < 30; i++) {
+                const recordDate = new Date(today);
+                recordDate.setDate(today.getDate() - i);
+                const dateString = recordDate.toISOString().split('T')[0];
+                
+                students.forEach(student => {
+                    subjects.forEach(subject => {
+                        // 为每个学生每个科目每天生成一条记录
+                        // 但随机跳过一些，使数据看起来更真实
+                        if (Math.random() > 0.3) {
+                            let answers;
+                            if (subject === 'chinese') answers = chineseAnswers;
+                            else if (subject === 'math') answers = mathAnswers;
+                            else answers = englishAnswers;
+                            
+                            const record = {
+                                date: dateString,
+                                student: student,
+                                subject: subject,
+                                answer1: answers[0][Math.floor(Math.random() * 5)],
+                                answer2: answers[1][Math.floor(Math.random() * 5)],
+                                answer3: answers[2][Math.floor(Math.random() * 5)],
+                                comments: `${dateString}的${subject}课表现记录`
+                            };
+                            
+                            studentRecords.push(record);
+                        }
+                    });
+                });
+            }
+        }
+        
+        // 初始化生成示例数据
+        generateSampleData();
+        
+        // 当前登录用户信息
+        let currentUser = null;
+        
+        // DOM元素获取
+        const loginSection = document.getElementById('login-section');
+        const teacherSection = document.getElementById('teacher-section');
+        const adminSection = document.getElementById('admin-section');
+        
+        const loginForm = document.getElementById('login-form');
+        const teacherForm = document.getElementById('teacher-form');
+        
+        const subjectBtns = document.querySelectorAll('.subject-btn');
+        const subjectQuestions = document.querySelectorAll('.subject-questions');
+        
+        const teacherSuccess = document.getElementById('teacher-success');
+        
+        // 切换显示的部分
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('onclick').includes(sectionId)) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // 切换科目
+        subjectBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const subject = this.getAttribute('data-subject');
+                
+                subjectBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                subjectQuestions.forEach(q => q.style.display = 'none');
+                document.getElementById(`${subject}-questions`).style.display = 'block';
+            });
+        });
+        
+        // 登录表单提交
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value
+const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            if (role === 'teacher') {
+                const teacher = userData.teachers.find(t => t.username === username && t.password === password);
+                if (teacher) {
+                    currentUser = {
+                        ...teacher,
+                        role: 'teacher'
+                    };
+                    showSection('teacher-section');
+                } else {
+                    alert('用户名或密码错误！');
+                }
+            } else if (role === 'admin') {
+                const admin = userData.admins.find(a => a.username === username && a.password === password);
+                if (admin) {
+                    currentUser = {
+                        ...admin,
+                        role: 'admin'
+                    };
+                    showSection('admin-section');
+                    loadRecordsTable();
+                } else {
+                    alert('用户名或密码错误！');
+                }
+            }
+        });
+        
+        // 教师记录表单提交
+        teacherForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const student = document.getElementById('student-name').value;
+            const date = document.getElementById('record-date').value;
+            const comments = document.getElementById('teacher-comments').value;
+            
+            // 获取当前选中的科目
+            const subject = document.querySelector('.subject-btn.active').getAttribute('data-subject');
+            
+            // 获取各个问题的答案
+            const answer1 = document.querySelector(`input[name="${subject}-focus"]:checked`) || 
+                          document.querySelector(`input[name="${subject}-understanding"]:checked`) ||
+                          document.querySelector(`input[name="${subject}-listening"]:checked`);
+            
+            const answer2 = document.querySelector(`input[name="${subject}-participation"]:checked`) || 
+                          document.querySelector(`input[name="${subject}-problem-solving"]:checked`) ||
+                          document.querySelector(`input[name="${subject}-speaking"]:checked`);
+                          
+            const answer3 = document.querySelector(`input[name="${subject}-homework"]:checked`) || 
+                          document.querySelector(`input[name="${subject}-thinking"]:checked`) ||
+                          document.querySelector(`input[name="${subject}-vocabulary"]:checked`);
+            
+            // 创建记录对象
+            const record = {
+                date: date,
+                student: student,
+                subject: subject,
+                answer1: answer1.value,
+                answer2: answer2.value,
+                answer3: answer3.value,
+                comments: comments
+            };
+            
+            // 添加到记录数组
+            studentRecords.push(record);
+            
+            // 显示成功消息
+            teacherSuccess.style.display = 'block';
+            setTimeout(() => {
+                teacherSuccess.style.display = 'none';
+            }, 3000);
+            
+            // 重置表单
+            teacherForm.reset();
+            
+            // 重新设置当天日期
+            document.getElementById('record-date').value = new Date().toISOString().split('T')[0];
+        });
+        
+        // 加载记录表格
+        function loadRecordsTable() {
+            const tableBody = document.querySelector('#records-table tbody');
+            tableBody.innerHTML = '';
+            
+            const studentFilter = document.getElementById('student-filter').value;
+            const subjectFilter = document.getElementById('subject-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+            
+            // 筛选记录
+            let filteredRecords = [...studentRecords];
+            
+            if (studentFilter) {
+                filteredRecords = filteredRecords.filter(record => record.student === studentFilter);
+            }
+            
+            if (subjectFilter) {
+                filteredRecords = filteredRecords.filter(record => record.subject === subjectFilter);
+            }
+            
+            if (dateFrom) {
+                filteredRecords = filteredRecords.filter(record => record.date >= dateFrom);
+            }
+            
+            if (dateTo) {
+                filteredRecords = filteredRecords.filter(record => record.date <= dateTo);
+            }
+            
+            // 按日期排序
+            filteredRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // 填充表格
+            filteredRecords.forEach(record => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.student}</td>
+                    <td>${record.subject === 'chinese' ? '语文' : record.subject === 'math' ? '数学' : '英语'}</td>
+                    <td>${record.answer1}</td>
+                    <td>${record.answer2}</td>
+                    <td>${record.answer3}</td>
+                    <td>${record.comments}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 筛选按钮事件
+        document.getElementById('filter-button').addEventListener('click', loadRecordsTable);
+        
+        // 设置当天日期为默认记录日期
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('record-date').value = today;
+    </script>
+</body>
+</html>
